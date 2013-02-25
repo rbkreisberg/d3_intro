@@ -1,0 +1,563 @@
+<!doctype html>  
+<html lang="en">
+	
+	<head>
+		<meta charset="utf-8">
+		<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+		
+		<title>Interactive Data Visualization for the Web</title>
+
+		<meta name="description" content="A short introduction to Data Vis with HTML5">
+		<meta name="author" content="Dick Kreisberg">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		
+		<link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='f' type='text/css'>
+		
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/theme/isb.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<script>
+			// If the query includes 'print-pdf' we'll use the PDF print sheet
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		    <!-- Font Awesome - http://fortawesome.github.com/Font-Awesome -->
+    <link rel="stylesheet" href="lib/assets/css/font-awesome.css">
+
+    <link href="lib/assets/css/vq.css" type="text/css" rel="stylesheet" />
+
+    <script type="text/javascript" src="lib/js/d3/d3.v2.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+
+
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="lib/assets/css/font-awesome-ie7.css">
+    <![endif]-->
+
+	<!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+	</head>
+	
+	<body>
+		
+		<div class="reveal">
+
+			<!-- Used to fade in a background when a specific slide state is reached -->
+			<div class="state-background"></div>
+			
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h2>Interactive Data Visualization for the Web</h2>
+					<p>
+					<h4>Dick Kreisberg</h4>
+					<h4>Institute for Systems Biology</h4>
+					</p>
+				</section>
+				<article title="Introduction"></article>
+				<section>
+					<h2>Outline</h2>
+					<p>
+						<ul>
+							<li>Introduction</li>
+							<li>HTML5</li>
+							<li>D3.js + CSS3 + SVG</li>
+						</ul>
+					</p>
+
+					<aside class="notes">
+						In the introduction, we will briefly motivate the the usage of interactive vis and its implementation on the browser.
+						We'll take a look at the components of HTML5 that make interactive vis possible.
+
+						In the tutorial, we'll create an interactive vis using the key concepts of SVG and the Javascript library D3.js
+					</aside>
+				</section>
+				
+				<!-- Example of nested vertical slides -->
+				<section>
+					<section>
+						<h2>What can Interactive Vis do for me?</h2>
+						<p>
+									<ul>
+						<li>Convey meaning</li>
+						<li class="fragment">Manage the 3 hurdles of data...<br><em>Scope</em>, <em>Scale</em>,
+							<em> Complexity</em></li>
+						<li class="fragment">Provide supporting data and context </li>
+					</ul>							
+						</p>
+						
+						<aside class="notes">
+							Convey - 
+							Scope - Explore heterogenous data that requires multiple plot types.
+							Scale - Global views with focal windows (Google Maps).  Zoom on demand.
+							Complexity - Networks with greater than 50,000 nodes, 20 million edges.  Traversal paths 			longer than 20
+							Supporting Data - statistical background
+							Context - Annotations on genes, proteins, microRNA, Clinical information
+						</aside>
+						</section>
+					<section data-state='circvis'>
+						<div id="wedge1" style="font: 10px sans-serif;margin:10px;"></div>
+<button id="50_random_edge">Add Edges</button>
+						
+					</section>					
+				</section>
+<article title="HTML5"></article>
+<section>
+				<section class='no-outline'>
+					<h2>HTML</h2>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+ &lt;head&gt;
+  &lt;title&gt;Hello World&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/b.css&quot;/&gt;
+  &lt;script type=&quot;text/javascript&quot;src=&#39;js/a.js&#39;&gt;&lt;/script&gt;
+ &lt;/head&gt;
+ &lt;body&gt;
+  &lt;div id="svg_container"&gt;    
+   &lt;svg width="450" height="300"
+           xmlns="http://www.w3.org/2000/svg"&gt;&lt;/svg&gt;
+   &lt;button&gt;Hi!&lt;/button&gt;
+  &lt;/div&gt;
+ &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+				</section>
+
+				<section>
+					<h2>CSS3 Selectors</h2>
+					<pre><code>&lt;div id=&quot;BRCA&quot;&gt;
+ &lt;ul class=&quot;mutations&quot;&gt;
+  &lt;li&gt;1&lt;/li&gt;
+  &lt;li&gt;2&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;div&gt;</code></pre>
+with jQuery:
+<pre><code>$(&#39;#BRCA&#39;) == &lt;div&gt;....&lt;/div&gt;
+$(&#39;.mutations&#39;) == &lt;ul&gt;...&lt;/ul&gt;
+$(&#39;.mutations li&#39;) == [&lt;li&gt;1&lt;/li&gt;,&lt;li&gt;2&lt;/li&gt;]
+$(&#39;.mutations li:first&#39;) == &lt;li&gt;1&lt;/li&gt;</code></pre>
+or d3:
+<pre><code>d3.select(&#39;#BRCA&#39;) == &lt;div&gt;....&lt;/div&gt;
+d3.select(&#39;.mutations&#39;) == &lt;ul&gt;...&lt;/ul&gt;
+d3.selectAll(&#39;.mutations li&#39;) == [&lt;li&gt;1&lt;/li&gt;,&lt;li&gt;2&lt;/li&gt;]
+d3.select(&#39;.mutations li:first&#39;) == &lt;li&gt;1&lt;/li&gt;</code></pre>
+				</section>
+				<section>
+					<h3>SVG</h3>
+<pre><code>&lt;svg id=&quot;updating-plot&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;
+	width=&quot;450&quot; height=&quot;200&quot;&gt;
+ &lt;g class=&quot;canvas&quot; transform=&quot;translate(25,15)&quot;&gt;
+   &lt;g class=&quot;axes&quot;&gt;&lt;/g&gt;
+   &lt;g class=&quot;labels&quot;&gt;&lt;/g&gt;
+   &lt;g class=&quot;data&quot;&gt;
+     &lt;circle cx=&quot;135&quot; cy=&quot;150&quot; fill=&quot;#F23&quot; stroke=&quot;none&quot; r=&quot;6&quot;/&gt; &lt;/g&gt;
+ &lt;rect fill=&quot;none&quot; stroke=&quot;#0000FF&quot; stroke-width=&quot;2&quot;
+  x=&quot;60&quot; y=&quot;30&quot; width=&quot;100&quot; height=&quot;60&quot; transform=&quot;rotate(45)&quot;/&gt;
+  &lt;path fill=&quot;none&quot; stroke=&quot;#444444&quot; stroke-width=&quot;2&quot;
+    d=&quot;M40 70 L240 100&quot;/&gt;
+  &lt;text x=&quot;100&quot; y=&quot;30&quot; class=&quot;label&quot;&gt;Hello World&lt;/text&gt;
+  &lt;/g&gt;
+&lt;/svg&gt;</code></pre>
+					<svg id="updating-plot" xmlns="http://www.w3.org/2000/svg" width="450" height="200">
+						<g class="canvas" transform="translate(25,15)">
+							<g class="axes"></g>
+							<g class="labels"></g>
+							<g class="data">
+								<circle class="data_point" cx="135" cy="150" fill="#F21632" stroke="none" r="6"/>
+							</g>
+							<rect fill="none" stroke="#0000FF" stroke-width="2"
+								x="60" y="30" width="100" height="60" transform="rotate(45)"/>
+							<path fill="none" stroke="#444444" stroke-width="2"
+								d="M40 70 L240 100"/>
+							<text x="100" y="30" class="label">Hello World</text>
+						</g>
+					</svg>
+</section>
+<section>
+	<h2>ECMAScript5</h2>
+	And the HTML Document API!<br/>
+	<p>
+		Javascript is growing (ES6 is coming) into a full featured tool.  It enables a growing number of interactions between the user, the browser, and the data.
+	</p>
+	<iframe frameborder="0" height="340" width="800" src="http://www.google.com/logos/2012/moog12-hp.html"></iframe><br/>
+	</section>
+</section>
+<article title="Tutorial"></article>
+				<section class="no-outline">
+					<h2>D3.js</h2> 
+					<a href="http://d3js.org" target="_blank">d3js.org</a>
+					<p>
+						Javascript library that joins data to the document (DOM).  Created by the author of Protovis, Mike Bostock.  Several other regular contributors on the project.
+					</p><p>
+						D3 is not rigidly coupled to SVG.  
+						SVG lends itself to functional operations.  
+						D3 does provide high level generators for creating SVG objects quickly.						
+					</p>
+				</section>
+				
+				<section>
+					<h2>Let's Make Something</h2>
+					<a href="http://jsfiddle.net/rbkreisberg/cdpcX/" target="_blank">jsfiddle.net/rbkreisberg/cdpcX/</a>
+					<iframe frameborder="0" height="400" width="500" src="http://jsfiddle.net/rbkreisberg/cdpcX/show/"></iframe><br/>
+					<br/>
+						Scatterplot with: axes, ticks, labels, cardinal	 interpolation, event-driven behavior, 
+						periodic behavior.
+				</section>
+<section>
+				<section>
+					<h2>Follow Along!</h2>
+					<a href="http://jsfiddle.net/rbkreisberg/cdpcX/1/" target="_blank">jsfiddle.net/rbkreisberg/cdpcX/1/</a>
+						<iframe frameborder="0" height="340" width="500" src="http://jsfiddle.net/rbkreisberg/cdpcX/1/show/"></iframe><br/>
+				</section>
+				<section>
+<pre><code contenteditable style="font-size: 18px; ">var w = 450,
+    h = 300;
+
+//attach an svg object to the DOM.  Size it appropriately    
+var svg = d3.select('#plot')
+            .append('svg:svg')
+              .attr('width', w)
+              .attr('height', h);
+    
+//draw an outer border.
+    svg.append('rect')
+        .attr('x', '0')
+        .attr('y', '0')
+        .attr('width', w)
+        .attr('height', h)
+        .attr('stroke-width', '2')
+        .attr('stroke', 'black')
+        .attr('fill', 'none');        
+
+         //attach a title to the graph using a svg:text object    
+    svg.append('text')
+        .attr('class', 'title')
+        .attr('x', w/2 - 40) //position in the center (sorta)
+        .attr('y', "14")
+        .text('Scatter Plot!');
+}
+</code></pre>
+				</section>
+</section>
+<section>
+				<section>
+					<h2>Data -> Rendered Circles</h2>
+					<h2>Change of Coordinates</h2>
+					<a href="http://jsfiddle.net/rbkreisberg/cdpcX/2/" target="_blank">jsfiddle.net/rbkreisberg/cdpcX/2/</a>
+						<iframe  frameborder="0" height="340" width="500" src="http://jsfiddle.net/rbkreisberg/cdpcX/2/show/"></iframe><br/>					
+					</section>
+					<section>F(data) = Viewport.X<br/>
+							G(data) = Viewport.Y<br/>
+<pre><code contenteditable style="font-size: 18px;">//x_scale maps the array index to the viewport
+var x_scale = d3.scale.linear()
+                  .domain([0,data_array.length-1])
+                  .range([0,viewport_width]);
+
+//invert the y_scale such that higher values is closer to the top
+var y_scale = d3.scale.linear()
+                  .domain([0,1000])
+                  .range([viewport_height,0]);
+</code></pre>
+</section>
+<section>
+	Create Axes<br/>
+		<iframe frameborder="0" height="340" width="500" src="http://jsfiddle.net/rbkreisberg/AyEm6/5/show/"></iframe>
+		<pre><code contenteditable style="font-size: 18px; ">//d3 function to create an axis from x_scale with the domain flipped
+var x_axis = d3.svg.axis()
+                .scale(x_scale.copy().domain([20,0]))//use the x_scale
+                .tickSize(-screen_height)
+                .ticks(5)
+                .orient('bottom');
+    
+d3.select('.unclipped-area')
+  .append('g')
+    .attr('class','x_axis')
+    .attr('transform','translate(0,' + screen_height + ')')
+    .call(x_axis);  //call the axis generator</pre></code>
+</section>
+<section>
+	Place Data in Viewport, Functionally
+	<pre><code contenteditable style="font-size: 18px; ">var data_array = [
+	{x:32, y:224}, //functionally, instead
+        {x:47, y:113},
+        {x:128, y:63},
+        {x:178, y:160},
+        ...
+        ];
+</code></pre>
+<pre><code contenteditable style="font-size: 18px; ">function drawCircles() {
+d3.select('.scatter_plot')
+  .selectAll('.data_point')
+  .data(data_array)
+  .enter()
+   .append('circle')  //add the circles
+    .attr('class', 'data_point')
+    .attr('cx', function(point) { return x_scale(point.x); })
+    .attr('cy', function(point) { return y_scale(point.y); })
+    .attr('r', 4 ) //radius of 4
+    .style('fill', 'blue' );//set style fill to blue
+}</code></pre>
+<p><svg width="400" height="300">
+	<circle cx="32" cy="224" r="20" style="fill:blue;"/>
+    <circle cx="82" cy="113" r="20" style="fill:blue;"/>    
+	<circle cx="132" cy="63" r="20" style="fill:blue;"/>
+    <circle cx="182" cy="160" r="20" style="fill:blue;"/>
+</svg>
+	</p>
+				</section>
+</section>
+<section>
+					<section>
+						<h2>Data -> Color, Lines</h2>
+						<a href="http://jsfiddle.net/rbkreisberg/cdpcX/3/" target="_blank">jsfiddle.net/rbkreisberg/cdpcX/3/</a>
+							<iframe frameborder="0" height="340" width="500" src="http://jsfiddle.net/rbkreisberg/cdpcX/3/show/"></iframe><br/>	
+					</section>
+				<section>
+						<h2>Color by Value</h2>
+<pre><code contenteditable style="font-size: 18px; ">z_color_scale = d3.scale.linear()
+                    .domain([0,100])
+                    .range(['blue','red']);
+
+function drawCircles() {
+...
+       .attr('r',4)
+       .style('fill',function(point) { 
+            return z_color_scale(point.z);})
+}
+</code></pre>
+        <iframe frameborder="0" height="340" width="500" src="http://jsfiddle.net/rbkreisberg/AyEm6/6/show/"></iframe>
+</section>
+<section>
+<pre><code contenteditable style="font-size: 18px;">function setupRendering() {
+    // create the path based on the index and y values    
+    create_line = d3.svg.line()
+          .x(function(point,i) {return x_scale(i);})
+          .y(function(point) {return y_scale(point.y);})
+          .interpolate('cardinal')
+          .tension(0.7);
+}
+
+function drawLine() {
+    d3.select('.line_plot')
+        .selectAll('.data_line')
+        .data([data_array])
+      .enter()
+      .append('path')	//path = line
+        .attr('class','data_line')
+        .attr('d',create_line); // 'd' determines the path
+}</code></pre>
+<iframe frameborder="0" height="350" width="500" src="http://jsfiddle.net/rbkreisberg/AyEm6/2/show/"></iframe>
+</section>
+</section>
+<section>
+				<section>
+					<h2>Animate with Transition()</h2>
+					<a href="http://jsfiddle.net/rbkreisberg/cdpcX/4/" target="_blank">jsfiddle.net/rbkreisberg/cdpcX/4/</a>
+						<iframe frameborder="0" height="400" width="500" src="http://jsfiddle.net/rbkreisberg/cdpcX/4/show/"></iframe><br/>	
+					</section>
+				<section>
+					<pre><code contenteditable style="font-size: 18px; ">function drawCircles() {
+    d3.select('.scatter_plot')
+...
+.on('mouseover',function()  {  //change size and color on mouseover
+	d3.select(this)
+	.transition()
+	  .duration(500)
+	  .attr('r', 15)
+	  .style('fill', 'black');
+	})
+.on('mouseout',function() {  //restore on mouseout
+  d3.select(this)
+    .transition()
+       .duration(500)
+       .attr( 'r', 4)                
+       .style( 'fill', function(point) { 
+             return z_color_scale(point.z); })
+});
+</code></pre>
+	<iframe frameborder="0" height="340" width="500" src="http://jsfiddle.net/rbkreisberg/AyEm6/7/show/"></iframe><br/>	
+				</section>
+				<section>
+<pre><code contenteditable style="font-size: 18px;">function appendDataPoint() {
+  data_array.push(createDataPoint());// push a new point onto the back
+    d3.select('.scatter_plot')
+        .selectAll('.data_point')
+        .remove();  //remove the circles
+
+      drawCircles(); //redraw circles       
+
+  d3.select('.data_plot')//move the parent panel of the circles to the left
+        .attr("transform", null) //reset translation to zero
+      .transition()  //begin the transition definition
+        .duration(1000)  //for 1000 msec
+        .ease("linear")  //at a constant rate        
+        .attr("transform", "translate(" + x_scale(-1) + ")") //go left!
+        .each("end", appendDataPoint);  //rinse and repeat
+  
+  data_array.shift(); // pop the oldest data point off of the array
+}
+</code></pre>
+					<iframe frameborder="0" height="400" width="500" src="http://jsfiddle.net/rbkreisberg/AyEm6/8/show/"></iframe><br/>	
+				</section>
+</section>
+<section>
+				<section>
+					<h2>Clip Away the Excess</h2>
+					<a href="http://jsfiddle.net/rbkreisberg/cdpcX/5/" target="_blank">jsfiddle.net/rbkreisberg/cdpcX/5/</a>
+					<iframe frameborder="0" height="380" width="500" src="http://jsfiddle.net/rbkreisberg/cdpcX/5/show/" target="_blank"></iframe>
+				</section>
+				<section>
+					<pre><code contenteditable style="font-size: 18px; ">//clipPath prevents the data from bleeding over into other areas    
+svg.append("defs")
+   .append("clipPath")
+	  .attr("id", "clip")
+   .append("rect")
+	  .attr("width", w*0.8)
+	  .attr("height", h*0.8);
+
+//the plot area is inset from the border
+svg.append('g')
+     .attr('class','unclipped-area')  
+     .attr('transform' , 'translate(' + ir_x_offset + ',' + ir_y_offset + ')')     
+   .append('g')        
+     .attr('class','clipped-area')     
+     .attr("clip-path", "url(#clip)"); //attach clip</code></pre>
+	<iframe frameborder="0" height="380" width="500" src="http://jsfiddle.net/rbkreisberg/AyEm6/10/show/" target="_blank"></iframe>
+
+					</section>
+				</section>
+				<section>
+					<section>
+								<h2>Resources</h2>
+								
+									<h3>D3.js</h3>
+									Mike Bostock - bost.ocks.org/mike/<br/>
+										<a href="http://d3js.org" target="_blank">d3js.org</a><br/>
+										<a href="http://github.com/mbostock/d3" target="_blank">github.com/mbostock/d3</a><br/>
+										D3 Google Groups<br/>
+										Stack Overflow<br/>
+										<a href="http://biovisualize.github.com/d3visualization/" target="_blank">Crazy Big Gallery of D3 examples</a><br/>
+										<a href="https://docs.google.com/spreadsheet/ccc?key=0AqMEGBUNwXeHdHpQNlVuY29SUE5BSXVtS3JueGlNYVE#gid=0" target="_blank">Long list of D3 examples</a><br/><br/>
+									
+									<h3>HTML, SVG, Javascript, R</h3>
+										w3schools.com<br/>	
+										learnsvg.com<br/>
+										svgbasics.com<br/>
+										codeacademy.com<br/>
+										dailyjs.com<br/>
+										<a href="https://polychart.com/js#examples" target="_blank">polychart.com/js </a>
+									</section>
+									<section>
+										<h2>Projects @ ISB</h2>
+						<p>
+							Regulome Explorer <br/>
+								<a href="http://explorer.cancerregulome.org" target="_blank">explorer.cancerregulome.org
+							</a><br/><br/>
+							Transcriptional Regulation & Epigenetic Landscape <br/>
+								<a href="http://trel.systemsbiology.net" target="_blank">trel.systemsbiology.net
+								</a><br/><br/>
+							Pubcrawl<br/>
+								<a href="pubcrawl.systemsbiology.net" target="_blank">pubcrawl.systemsbiology.net
+								</a><br/>
+</p><br/>
+Search 'codefor@systemsbiology.org' at code.google.com
+									</section>
+									<section>
+										<br/><br><br>	
+										<code>
+										dick.kreisberg@systemsbiology.org
+									</code>									
+									</section>
+							</section>
+			
+				<section class='no-outline'>
+					<section class='no-outline'>
+					<h2>Questions?</h2>
+				</section>
+					<section>
+						<p>
+						<h3>Reveal.JS</h3>
+						lab.hakim.se/reveal-js/
+					</p><p>
+						<h3>JSFiddle</h3>
+						jsfiddle.net
+					</p><p>
+						<h3>NodeJS</h3>
+						nodejs.org
+					</p>
+					<p>
+						<h3>Circos</h3>
+					circos.ca
+					</p>
+					</section>
+
+				</section>
+					
+			</section>
+			</div>
+
+			<!-- The navigational controls UI -->
+			<aside class="controls">
+				<a class="left" href="#">&#x25C4;</a>
+				<a class="right" href="#">&#x25BA;</a>
+				<a class="up" href="#">&#x25B2;</a>
+				<a class="down" href="#">&#x25BC;</a>
+			</aside>
+			<aside style="margin-left:20px;margin-top:15px;">
+				<small>rbkreisberg.github.com/d3_intro/</small>
+			</aside>
+
+			<div class="outline"></div>
+			<!-- Presentation progress bar -->
+			<div class="progress"><span></span></div>
+			
+		</div>
+
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				outline: true,
+				
+				theme: Reveal.getQueryHash().theme || 'isb', // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/linear(2d)
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/highlight.js', async: true, callback: function() { window.hljs.initHighlightingOnLoad(); } },
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'lib/js/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'lib/js/data-markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '/socket.io/socket.io.js', async: true, condition: function() { return window.location.host === 'localhost:1947'; } },
+					{ src: 'plugin/speakernotes/client.js', async: true, condition: function() { return window.location.host === 'localhost:1947'; } },
+				]
+			});
+			
+		</script>
+
+		    <script type="text/javascript" src="lib/js/underscore/underscore.js"></script>
+    <script type="text/javascript" src="lib/js/vq/vq.js"></script>
+    <script type="text/javascript" src="lib/js/vq/vq.circvis.js"></script>
+    <script type="text/javascript" src="lib/circvis/data/circvis_data.json"></script>
+    <script type="text/javascript" src="lib/circvis/js/circvis_demo.js"></script>
+    <script type="text/javascript" src="lib/circvis/js/circvis_configure.js"></script>
+<script type="text/javascript">
+      var circle;
+    circle = circvis.plot($('#wedge1').get(0));
+</script>
+
+	</body>
+</html>
